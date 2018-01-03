@@ -5,8 +5,8 @@ services:
   - docker
 
 env:
-  - ARCH=i686 DOCKER_IMAGE=toopher/centos-i386:centos6
-  - ARCH=x86_64 DOCKER_IMAGE=library/centos:6.8
+  - ARCH=x86_64 DOCKER_IMAGE=quay.io/appimage/appimagebuild
+  - ARCH=i686 DOCKER_IMAGE=quay.io/appimage/appimagebuild-i386
 
 script:
   - mkdir -p ./out/
