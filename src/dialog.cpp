@@ -87,7 +87,7 @@ void get_system_font(std::string &font)
 
   IDesktopEnvironment *env = IDesktopEnvironment::getInstance();
 
-  if (env == NULL || env->gtkInterfaceFont(font) == false)
+  if (env == NULL || !env->gtkInterfaceFont(font))
   {
     font = "Helvetica";
     delete env;
