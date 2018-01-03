@@ -8,4 +8,4 @@ target_link_libraries(dialog
 
 add_dependencies(dialog resources)
 
-target_include_directories(dialog PRIVATE ${resources_INCLUDE_DIR})
+target_include_directories(dialog PRIVATE ${resources_INCLUDE_DIR} fltk fltk_images)
