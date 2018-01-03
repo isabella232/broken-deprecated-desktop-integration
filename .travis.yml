@@ -10,7 +10,7 @@ env:
 
 script:
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit-dialog" "$DOCKER_IMAGE" /bin/bash -c "/AppImageKit-dialog/build.sh ; cp /AppImageKit-dialog/src/dialog out/dialog-${ARCH}"
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit-dialog" "$DOCKER_IMAGE" /bin/bash -xc "cd /AppImageKit-dialog && bash build.sh && cp build/src/dialog /out/dialog-${ARCH}"
 
 after_success:
   - ls -lh out/*
