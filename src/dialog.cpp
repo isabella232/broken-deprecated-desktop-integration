@@ -38,7 +38,9 @@
 #include <climits>
 #include <cerrno>
 
-#include "desktopenvironments.h"
+#include <desktopenvironments.h>
+#include <appimage/appimage.h>
+
 #include "dialog_images.h"
 
 
@@ -121,10 +123,6 @@ void closeCallback(Fl_Widget*) {
     win->hide();
 }
 
-void createMenuEntryCallback(Fl_Widget*) {
-    win->hide();
-}
-
 void launchCallback(Fl_Widget*) {
     win->hide();
 
@@ -161,6 +159,21 @@ void launchCallback(Fl_Widget*) {
     argv[1] = NULL;
 
     execv(appPath.data(), argv);
+}
+
+void createMenuEntryCallback(Fl_Widget*) {
+    win->hide();
+
+    char* path = getenv("APPIMAGE");
+
+    if (path == NULL) {
+        std::cerr << "Warning: APPIMAGE not found in environment. Skipping integration." << std::endl
+                  << "Are you running this from an AppImage?" << std::endl;
+    } else {
+        appimage_register_in_system(path, false);
+    }
+
+    launchCallback(NULL);
 }
 
 void checkButtonCallback(Fl_Widget*) {

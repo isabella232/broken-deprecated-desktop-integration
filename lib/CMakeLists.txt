@@ -13,3 +13,4 @@ set(OPTION_USE_XRENDER OFF)
 
 add_subdirectory(fltk)
 
+add_subdirectory(AppImageKit)
