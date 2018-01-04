@@ -4,7 +4,7 @@ target_link_libraries(dialog
     fltk
     fltk_images
     libdesktopenvironments
-    libappimage
+    libappimage_static
 )
 
 add_dependencies(dialog resources)
