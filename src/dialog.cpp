@@ -31,15 +31,18 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <string>
 #include <vector>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+#include <unistd.h>
+#include <climits>
+#include <errno.h>
 
 #include "desktopenvironments.h"
 #include "dialog_images.h"
 
+
+// translations
 const char* msg_launch = "\nLaunch app\n\n";
 const char* msg_menu = "\nCreate menu entry\nand launch app";
 const char* msg_checkbox = " Don't show this message again";
@@ -48,16 +51,12 @@ const char* msg_launch_de = "\nStarte App\n\n";
 const char* msg_menu_de = "\nMen" "\xC3\xBC" "eintrag erstellen\nund App starten";
 const char* msg_checkbox_de = " Dieses Fenster nicht erneut anzeigen";
 
-enum {
-    RET_LAUNCH_APP = 0,
-    RET_MENU_ENTRY = 1,
-    RET_DISABLE_MESSAGE = 2,
-    RET_CLOSE_WINDOW = 3
-};
-
+// main window
 Fl_Double_Window* win;
-int rv = 0;
+
+// state keeping
 bool checkbutton_set = false;
+
 
 std::vector<std::string> splitString(const std::string& str, const char delimiter = ' ') {
     std::vector<std::string> result;
@@ -118,18 +117,54 @@ void get_system_font(std::string& font) {
     font = newFont.str();
 }
 
-void close_cb(Fl_Widget*, long p) {
+void close_cb(Fl_Widget*) {
     win->hide();
-    rv = (int) p;
 }
 
-void launch_cb(Fl_Widget*, long p) {
+void create_menu_entry_cb(Fl_Widget*) {
     win->hide();
-    rv = checkbutton_set ? RET_DISABLE_MESSAGE : (int) p;
+}
+
+void launch_cb(Fl_Widget*) {
+    win->hide();
+
+    const std::string procSelfExePath = "/proc/self/exe";
+
+    std::vector<char> buffer(PATH_MAX);
+
+    if (readlink("/proc/self/exe", buffer.data(), buffer.size()) < 0) {
+        int error = errno;
+        std::cerr << "readlink() failed: " << strerror(error) << std::endl;
+        exit(1);
+    }
+
+    std::string appPath = buffer.data();
+
+    std::string wrapperSuffix = ".wrapper";
+
+    ssize_t wrapperSuffixOffset = appPath.find(wrapperSuffix);
+
+    if (wrapperSuffixOffset == std::string::npos || (appPath.begin() + wrapperSuffixOffset + wrapperSuffix.length()) != appPath.end()) {
+        std::cerr << "Failed to detect path to actual application: " << wrapperSuffix << " suffix missing";
+        exit(1);
+    }
+
+    appPath = appPath.substr(0, static_cast<unsigned long>(wrapperSuffixOffset));
+
+    if (appPath[appPath.length()-1] == '/') {
+        std::cerr << "Failed to detect path to actual application: is a directory: " << appPath;
+        exit(1);
+    }
+
+    char* argv[2];
+    argv[0] = strdup(appPath.c_str());
+    argv[1] = NULL;
+
+    execv(appPath.data(), argv);
 }
 
 void checkbutton_cb(Fl_Widget*) {
-    checkbutton_set = checkbutton_set ? false : true;
+    checkbutton_set = !checkbutton_set;
 }
 
 int launcher(const char* title) {
@@ -148,7 +183,7 @@ int launcher(const char* title) {
     }
 
     win = new Fl_Double_Window(480, 286, title);
-    win->callback(close_cb, RET_CLOSE_WINDOW);
+    win->callback(close_cb);
     {
         {
             Fl_Button* o = new Fl_Button(40, 40, 180, 180, msg_launch);
@@ -156,7 +191,7 @@ int launcher(const char* title) {
             o->box(FL_GLEAM_THIN_UP_BOX);
             o->down_box(FL_GLEAM_THIN_DOWN_BOX);
             o->clear_visible_focus();
-            o->callback(launch_cb, RET_LAUNCH_APP);
+            o->callback(launch_cb);
         }
 
         {
@@ -165,7 +200,7 @@ int launcher(const char* title) {
             o->box(FL_GLEAM_THIN_UP_BOX);
             o->down_box(FL_GLEAM_THIN_DOWN_BOX);
             o->clear_visible_focus();
-            o->callback(close_cb, RET_MENU_ENTRY);
+            o->callback(create_menu_entry_cb);
         }
 
         {
@@ -178,7 +213,8 @@ int launcher(const char* title) {
     win->end();
     win->show();
 
-    Fl::run();
+    int rv = Fl::run();
+
     return rv;
 }
 
@@ -189,12 +225,9 @@ int main(int argc, char** argv) {
     if (argc > 1) {
         if (strcmp(argv[1], "--help") == 0) {
             printf("Usage: %s WINDOWTITLE\n\n"
-                    "Return values:\n\tlaunch app -> %d\n\tmenu entry -> %d\n\t"
-                    "disable message + launch app -> %d\n\tclose window -> %d\n"
                     /* identify usage as required per FLTK license LGPL exception condition 4 */
                     "\n\nThis program is using FLTK v%d.%d.%d (http://www.fltk.org)\n",
-                argv[0], RET_LAUNCH_APP, RET_MENU_ENTRY, RET_DISABLE_MESSAGE,
-                RET_CLOSE_WINDOW, FL_MAJOR_VERSION, FL_MINOR_VERSION, FL_PATCH_VERSION);
+                argv[0], FL_MAJOR_VERSION, FL_MINOR_VERSION, FL_PATCH_VERSION);
             return 0;
         }
         title = argv[1];
