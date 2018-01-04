@@ -74,7 +74,7 @@ std::vector<std::string> splitString(const std::string& str, const char delimite
     return result;
 }
 
-void get_system_font(std::string& font) {
+void getSystemFont(std::string& font) {
     std::vector<std::string> splitted;
     std::string last;
     std::stringstream fontSize;
@@ -117,15 +117,15 @@ void get_system_font(std::string& font) {
     font = newFont.str();
 }
 
-void close_cb(Fl_Widget*) {
+void closeCallback(Fl_Widget*) {
     win->hide();
 }
 
-void create_menu_entry_cb(Fl_Widget*) {
+void createMenuEntryCallback(Fl_Widget*) {
     win->hide();
 }
 
-void launch_cb(Fl_Widget*) {
+void launchCallback(Fl_Widget*) {
     win->hide();
 
     const std::string procSelfExePath = "/proc/self/exe";
@@ -163,7 +163,7 @@ void launch_cb(Fl_Widget*) {
     execv(appPath.data(), argv);
 }
 
-void checkbutton_cb(Fl_Widget*) {
+void checkButtonCallback(Fl_Widget*) {
     checkbutton_set = !checkbutton_set;
 }
 
@@ -183,7 +183,7 @@ int launcher(const char* title) {
     }
 
     win = new Fl_Double_Window(480, 286, title);
-    win->callback(close_cb);
+    win->callback(closeCallback);
     {
         {
             Fl_Button* o = new Fl_Button(40, 40, 180, 180, msg_launch);
@@ -191,7 +191,7 @@ int launcher(const char* title) {
             o->box(FL_GLEAM_THIN_UP_BOX);
             o->down_box(FL_GLEAM_THIN_DOWN_BOX);
             o->clear_visible_focus();
-            o->callback(launch_cb);
+            o->callback(launchCallback);
         }
 
         {
@@ -200,13 +200,13 @@ int launcher(const char* title) {
             o->box(FL_GLEAM_THIN_UP_BOX);
             o->down_box(FL_GLEAM_THIN_DOWN_BOX);
             o->clear_visible_focus();
-            o->callback(create_menu_entry_cb);
+            o->callback(createMenuEntryCallback);
         }
 
         {
             Fl_Check_Button* o = new Fl_Check_Button(40, 240, 400, 26, msg_checkbox);
             o->clear_visible_focus();
-            o->callback(checkbutton_cb);
+            o->callback(checkButtonCallback);
         }
     }
     win->position((Fl::w() - win->w()) / 2, (Fl::h() - win->h()) / 2);
@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
         title = argv[1];
     }
 
-    get_system_font(font);
+    getSystemFont(font);
     Fl::set_font(FL_HELVETICA, font.c_str());
 
     Fl::get_system_colors();
@@ -241,4 +241,3 @@ int main(int argc, char** argv) {
 
     return launcher(title);
 }
-
