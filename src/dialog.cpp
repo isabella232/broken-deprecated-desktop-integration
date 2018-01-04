@@ -36,7 +36,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <climits>
-#include <errno.h>
+#include <cerrno>
 
 #include "desktopenvironments.h"
 #include "dialog_images.h"
