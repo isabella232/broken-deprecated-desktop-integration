@@ -15,7 +15,8 @@ cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=MinSizeRel
 
-make -j8
+# only make dialog, building other targets isn't necessary
+make -j8 dialog
 
 $STRIP src/dialog
 
