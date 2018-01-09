@@ -1,6 +1,8 @@
 add_subdirectory(libdesktopenvironments)
 
 set(OPTION_USE_XFT ON)
+set(OPTION_CAIRO OFF)
+set(OPTION_CAIROEXT OFF)
 set(OPTION_USE_SYSTEM_LIBPNG OFF)
 set(OPTION_USE_SYSTEM_ZLIB ON)
 
